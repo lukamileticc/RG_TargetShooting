@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../glad/include/KHR/khrplatform.h
+stdint.h
+-
+inttypes.h
+-
+stdint.h
+-
+
+../glad/include/glad/glad.h
+KHR/khrplatform.h
+-
+
+/home/luka/Desktop/projekti/RG_TargetShooting/main.cpp
+iostream
+-
+glad/glad.h
+-
+GLFW/glfw3.h
+-
+
