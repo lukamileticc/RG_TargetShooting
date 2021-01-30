@@ -18,6 +18,12 @@ stdint.h
 KHR/khrplatform.h
 -
 
+/home/luka/Desktop/projekti/RG_TargetShooting/include/Error.hpp
+glad/glad.h
+/home/luka/Desktop/projekti/RG_TargetShooting/include/glad/glad.h
+iostream
+-
+
 /home/luka/Desktop/projekti/RG_TargetShooting/main.cpp
 iostream
 -
@@ -25,4 +31,6 @@ glad/glad.h
 -
 GLFW/glfw3.h
 -
+include/Error.hpp
+/home/luka/Desktop/projekti/RG_TargetShooting/include/Error.hpp
 

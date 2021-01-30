@@ -2,40 +2,7 @@
 //obavezno ide prvo glad pa onda glfw
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-const char* gl_error_to_string(GLenum err){
-    switch (err) {
-        case GL_NO_ERROR : return "GL_NO_ERROR";
-        case GL_INVALID_ENUM: return  "GL_INVALID_ENUM";
-        case GL_INVALID_VALUE: return  "GL_INVALID_VALUE";
-        case GL_INVALID_OPERATION: return  "GL_INVALID_OPERATION";
-        case GL_INVALID_FRAMEBUFFER_OPERATION : return  "GL_INVALID_FRAMEBUFFER_OPERATION";
-        case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
-
-        default: {
-            std::cerr << "NoSuch Error" << std::endl;
-        }
-    }
-}
-
-void gl_clear_errors() {
-    while(glGetError() != GL_NO_ERROR) {}
-}
-bool gl_log_call(const char *file, int line, const char *call) {
-
-    bool success = true;
-    while(GLenum err = glGetError()){
-        std::cerr << "[OpenGL Error]: " << err << "Msg: " << gl_error_to_string(err) << std::endl;
-        std::cerr << "File:" << file << std::endl;
-        std::cerr << "Line" << line << std::endl;
-        std::cerr << "Call" << call << std::endl;
-
-        success = false;
-    }
-    return success;
-}
-#define ASSERT(x) if(!(x)) __builtin_trap();
-#define SIGCALL(f) {gl_clear_errors(); f; ASSERT(gl_log_call(__FILE__, __LINE__ , #f))}
+#include "include/Error.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window,int width,int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -72,6 +39,12 @@ int main() {
     glClearColor(0.0f, 0.0f, 0.0f ,1.0f);
 //    SIGCALL(glClear(GL_ARRAY_BUFFER));
     glClear(GL_COLOR_BUFFER_BIT);
+
+
+    
+
+
+
 
     //render function
     while(!glfwWindowShouldClose(window)){
