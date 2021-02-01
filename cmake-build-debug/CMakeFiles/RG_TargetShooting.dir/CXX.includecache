@@ -24,6 +24,18 @@ glad/glad.h
 iostream
 -
 
+/home/luka/Desktop/projekti/RG_TargetShooting/include/Shader.hpp
+glad/glad.h
+/home/luka/Desktop/projekti/RG_TargetShooting/include/glad/glad.h
+string
+-
+sstream
+-
+fstream
+-
+Error.hpp
+/home/luka/Desktop/projekti/RG_TargetShooting/include/Error.hpp
+
 /home/luka/Desktop/projekti/RG_TargetShooting/main.cpp
 iostream
 -
@@ -31,6 +43,10 @@ glad/glad.h
 -
 GLFW/glfw3.h
 -
+cmath
+-
+include/Shader.hpp
+/home/luka/Desktop/projekti/RG_TargetShooting/include/Shader.hpp
 include/Error.hpp
 /home/luka/Desktop/projekti/RG_TargetShooting/include/Error.hpp
 

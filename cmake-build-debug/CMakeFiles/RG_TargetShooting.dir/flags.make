@@ -6,5 +6,5 @@ CXX_FLAGS = -g   -std=gnu++1z
 
 CXX_DEFINES = -DGLFW_DLL
 
-CXX_INCLUDES = -I/home/luka/Desktop/projekti/RG_TargetShooting/glad/include 
+CXX_INCLUDES = -I/home/luka/Desktop/projekti/RG_TargetShooting/include -I/home/luka/Desktop/projekti/RG_TargetShooting/glad/include 
 

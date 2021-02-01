@@ -4,5 +4,6 @@
 CMakeFiles/RG_TargetShooting.dir/main.cpp.o: ../glad/include/KHR/khrplatform.h
 CMakeFiles/RG_TargetShooting.dir/main.cpp.o: ../glad/include/glad/glad.h
 CMakeFiles/RG_TargetShooting.dir/main.cpp.o: ../include/Error.hpp
+CMakeFiles/RG_TargetShooting.dir/main.cpp.o: ../include/Shader.hpp
 CMakeFiles/RG_TargetShooting.dir/main.cpp.o: ../main.cpp
 

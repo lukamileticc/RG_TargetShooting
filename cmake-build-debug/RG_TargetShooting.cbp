@@ -45,6 +45,7 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add option="-DGLFW_DLL"/>
+					<Add directory="/home/luka/Desktop/projekti/RG_TargetShooting/include"/>
 					<Add directory="/home/luka/Desktop/projekti/RG_TargetShooting/glad/include"/>
 					<Add directory="/usr/include/c++/7"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
@@ -70,6 +71,7 @@
 				<Option compiler="gcc"/>
 				<Compiler>
 					<Add option="-DGLFW_DLL"/>
+					<Add directory="/home/luka/Desktop/projekti/RG_TargetShooting/include"/>
 					<Add directory="/home/luka/Desktop/projekti/RG_TargetShooting/glad/include"/>
 					<Add directory="/usr/include/c++/7"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
