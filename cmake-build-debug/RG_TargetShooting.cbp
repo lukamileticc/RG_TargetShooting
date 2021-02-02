@@ -150,6 +150,9 @@
 		<Unit filename="/home/luka/Desktop/projekti/RG_TargetShooting/include/Shader.hpp">
 			<Option target="RG_TargetShooting"/>
 		</Unit>
+		<Unit filename="/home/luka/Desktop/projekti/RG_TargetShooting/include/stb_image.h">
+			<Option target="RG_TargetShooting"/>
+		</Unit>
 		<Unit filename="/home/luka/Desktop/projekti/RG_TargetShooting/main.cpp">
 			<Option target="RG_TargetShooting"/>
 		</Unit>

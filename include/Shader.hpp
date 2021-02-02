@@ -6,6 +6,7 @@
 #define RG_TARGETSHOOTING_SHADER_HPP
 
 #include "glad/glad.h"
+#include "glm/glm.hpp"
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -99,10 +100,20 @@ public:
         int uniform_id = glGetUniformLocation(m_Id,name.c_str());
         glUniform1i(uniform_id,value);
     }
+    void setMat4(std::string name, glm::mat4 math)
+    {
+        int uniform_id = glGetUniformLocation(m_Id,name.c_str());
+        glUniformMatrix4fv(uniform_id,1,GL_FALSE, &math[0][0]);
+    }
     void deleteProgram()
     {
         glDeleteProgram(m_Id);
         m_Id = -1;
+    }
+
+    int getShaderId() const
+    {
+        return  m_Id;
     }
 
 private:

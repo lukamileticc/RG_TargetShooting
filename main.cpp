@@ -3,16 +3,30 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
+#include <stb_image.h>
 #include "include/Shader.hpp"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include "include/Error.hpp"
 
 
+
+
 void framebuffer_size_callback(GLFWwindow* window,int width,int height);
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void updateProcesInput(GLFWwindow *window);
 
 //screen settings
-const unsigned int SCR_WIDTH = 1400;
-const unsigned int SCR_HEIGHT = 900;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
+
+//camera
+glm::vec3 cameraPos = glm::vec3(0.0f ,0.0f, 2.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+
+//time
+float delta_time = 0.0f;
+float last_frame = 0.0f;
 
 int main() {
     glfwInit();
@@ -35,8 +49,6 @@ int main() {
     //kazemo opengl dimenzije za renderovanje
     glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);
 
-    //funkcija koja registruje pritiske na tastaturu(callback) i automatski se poziva
-    glfwSetKeyCallback(window,key_callback);
 
 
     //sada zovemo glad biblioteku da ucita sve nase opengl funkcije!
@@ -46,33 +58,77 @@ int main() {
         return EXIT_FAILURE;
     }
 
+    //kazemo da hocemo da enablujemo dubinu
+    glEnable(GL_DEPTH_TEST);
 
     Shader shader("../resources/shaders/vertexShader.vs",
                   "../resources/shaders/fragmentShader.fs");
 
 
-
+    //pravimo kvadar u 3D-u
     float vertices[] = {
-            0.5f,0.5f,0.0f,  //top right
-            0.5f,-0.5f,0.0f, // bottom right
-            -0.5f,-0.5f,0.0f, // bottom left
-            -0.5f,0.5f,0.0f  // top left
-    };
-
-    unsigned indices[] = {
+            //prednji pravougaonik
             //first triangle
-            0,1,3,
+            1.0, 0.5, 1.0, 0.0, 1.0, 1.0,   1.0, 0.0,//top right
+            -1.0, 0.5 , 1.0, 0.0, 1.0, 1.0,    0.0, 0.0,//top left
+            1.0, -0.5, 1.0 ,  0.0, 1.0, 1.0,   0.0, 0.0,// bottom right
             //second triangle
-            1,2,3
+            1.0, -0.5, 1.0,  0.0, 1.0, 1.0,   0.0, 0.0,//bottom right
+            -1.0, 0.5, 1.0,   0.0, 1.0, 1.0,   0.0, 0.0,//top left
+            -1.0, -0.5, 1.0,  0.0, 1.0, 1.0,   0.0, 0.0, // bottom left
+
+            //desni pravougaonik
+            1.0, 0.5, 1.0,   1.0, 0.0, 0.0,   0.0, 0.0,
+            1.0, -0.5, 1.0,  1.0, 0.0, 0.0,   0.0, 0.0,
+            1.0, 0.5, -6.0,  1.0, 0.0, 0.0,   0.0, 0.0,
+            1.0, 0.5, -6.0,  1.0, 0.0, 0.0,   0.0, 0.0,
+            1.0, -0.5, 1.0,  1.0, 0.0, 0.0,   0.0, 0.0,
+            1.0, -0.5, -6.0,  1.0, 0.0, 0.0,   0.0, 0.0,
+
+            //levi pravouganik
+            -1.0, 0.5 , 1.0, 0.0, 1.0, 0.0,   0.0, 0.0,
+            -1.0, -0.5, 1.0, 0.0, 1.0, 0.0,   0.0, 0.0,
+            -1.0, 0.5, -6.0, 0.0, 1.0, 0.0,   0.0, 0.0,
+            -1.0, -0.5, 1.0, 0.0, 1.0, 0.0,   0.0, 0.0,
+            -1.0, 0.5, -6.0, 0.0, 1.0, 0.0,   0.0, 0.0,
+            -1.0, -0.5, -6.0, 0.0, 1.0, 0.0,   0.0, 0.0,
+
+            //zadnja stranica
+            1.0, 0.5, -6.0,   0.0, 0.0, 1.0,    0.0, 0.0,
+            -1.0, 0.5 , -6.0,   0.0, 0.0, 1.0,  0.0, 0.0,
+            1.0, -0.5, -6.0 ,   0.0, 0.0, 1.0,  0.0, 0.0,
+            1.0, -0.5, -6.0,    0.0, 0.0, 1.0,  0.0, 0.0,
+            -1.0, 0.5, -6.0,    0.0, 0.0, 1.0,  0.0, 0.0,
+            -1.0, -0.5, -6.0,   0.0, 0.0, 1.0,  0.0, 0.0,
+
+            //donja strana
+            1.0, -0.5, 1.0,   0.0 ,0.6, 0.7,   1.0 ,0.0,
+            -1.0, -0.5, 1.0,   0.0 ,0.6, 0.7,  0.0, 0.0,
+            -1.0, -0.5, -6.0,  0.0 ,0.6, 0.7,  0.0, 1.0,
+            1.0, -0.5, 1.0,    0.0 ,0.6, 0.7,  1.0 ,0.0,
+            1.0, -0.5, -6.0,  0.0 ,0.6, 0.7,   1.0, 1.0,
+            -1.0, -0.5, -6.0,  0.0 ,0.6, 0.7,  0.0, 1,0,
+
+            //gornja strana
+            -1.0, 0.5 , 1.0,  1.0, 1.0, 0.2,   0.0, 0.0,
+            1.0, 0.5, 1.0,   1.0, 1.0, 0.2,     0.0, 0.0,
+            -1.0, 0.5, -6.0,   1.0, 1.0, 0.2,   0.0, 0.0,
+            -1.0, 0.5, -6.0, 1.0, 1.0, 0.2,    0.0, 0.0,
+            1.0, 0.5, 1.0,    1.0, 1.0, 0.2,   0.0, 0.0,
+            1.0, 0.5, -6.0,   1.0, 1.0, 0.2,  0.0, 0.0,
+
+
+
     };
 
-    unsigned int VAO,VBO,EBO;
+
+
+    unsigned int VAO,VBO;
     //kreirmao objekat koji ce da kaze sta znace podaci iz VBO
     glGenVertexArrays(1,&VAO);
     //kreiramo baffer preko kog saljemo podatke ka gpu
     glGenBuffers(1,&VBO);
-    //kreiramo element buffer koji nam predstavlja redne brojeve trougla
-    glGenBuffers(1,&EBO);
+
     //aktiviramo ovaj objekat
     glBindVertexArray(VAO);
 
@@ -80,54 +136,106 @@ int main() {
     //aktiviramo ovaj bafer
     glBindBuffer(GL_ARRAY_BUFFER,VBO);
     //smestamo podatke u ovaj bafer
-    GLCALL(glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW));
-
-
-    //aktiviramo ga
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
-    //smestamo podatke u njega
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,sizeof(vertices),vertices,GL_STATIC_DRAW);
 
 
     //kazemo sta znace podaci iz vbo
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*sizeof(float),(void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float),(void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1,3,GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)(3*sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2,2,GL_FLOAT, GL_FALSE, 8* sizeof(float), (void*)(6*sizeof (float )));
+    glEnableVertexAttribArray(2);
 
-
-
-    glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER,0);
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+    glBindVertexArray(0);
+
+    //pravimo teksturu
+    unsigned  int texture;
+    glGenTextures(1,&texture);
+    glBindTexture(GL_TEXTURE_2D,texture);
+    //parametri za teksturu
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    //ucitavamo sliku
+    int width,height,nChannel;
+    unsigned char* pixels = stbi_load("../resources/textures/floor.jpg",&width, &height,&nChannel, 0);
+    if(pixels){
+        glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,width,height, 0 , GL_RGB, GL_UNSIGNED_BYTE,pixels);
+        //generisi mip_mape
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else{
+        std::cerr << "Failed to load texture" << std::endl;
+    }
+    stbi_image_free(pixels);
+
+    //namestamo uniform promeljivu
+    shader.use();
+    shader.setUniform1i("texture0",0);
 
 
 
+
+// inicijalno postavljanje boje
+    glClearColor(0.2, 0.3, 0.3,1.0);
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+    //ovde moze i GL_LINE
+
+//aktiviramo shader
+    shader.use();
+
+    //pravimo projekciju
+    glm::mat4 projection = glm::mat4(1.0f);
+    //postavljam perspektivnu projekciju sa 45 stepeni
+    projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    shader.setMat4("projection", projection);
 
     //RENDER loop
     while(!glfwWindowShouldClose(window))
     {
-        glfwPollEvents();
-
         //postavljamo boju
-        glClearColor(0.2, 0.3, 0.3,1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        float currentFrame = glfwGetTime();
+        delta_time = currentFrame - last_frame;
+        last_frame = currentFrame;
 
+        updateProcesInput(window);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
 
         shader.use();
-        shader.setUniform4f("gColor",sin(glfwGetTime() / 2.0 + 0.5), 0.0, 0.0, 1.0);
+
+        // camera/view transformation
+        glm::mat4 view = glm::lookAt(cameraPos, cameraFront + cameraPos, cameraUp);
+        shader.setMat4("view", view);
+        //Pravimo transformaciju
+        glm::mat4 model = glm::mat4(1.0f);
+//        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 0.0f));
+        unsigned int modelLoc = glGetUniformLocation(shader.getShaderId(), "model");
+        unsigned int viewLoc  = glGetUniformLocation(shader.getShaderId(), "view");
+        // pass them to the shaders (3 different ways)
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE,&model[0][0]);
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+
+
 
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
+        glDrawArrays(GL_TRIANGLES,0,36);
+
 
         glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     //brisemo sve objekte koji nam vise nisu potrebni
     glDeleteVertexArrays(1,&VAO);
     glDeleteBuffers(1,&VBO);
-    glDeleteBuffers(1,&EBO);
 
     shader.deleteProgram();
 
@@ -135,23 +243,26 @@ int main() {
     glfwTerminate();
     return 0;
 }
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
-    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
+void updateProcesInput(GLFWwindow* window)
+{
+    if(glfwGetKey(window,GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window,true);
     }
-    //R
-    if(key == GLFW_KEY_R && action == GLFW_PRESS){
-        glClearColor(1.0,0.0,0.0,1.0);
+    float cameraSpeed = 2.5f * delta_time;
+    if(glfwGetKey(window,GLFW_KEY_W) == GLFW_PRESS){
+        cameraPos += cameraFront * cameraSpeed;
     }
-    //B
-    if(key == GLFW_KEY_B && action == GLFW_PRESS){
-        glClearColor(0.0,0.0,1.0,1.0);
+    if(glfwGetKey(window,GLFW_KEY_S) == GLFW_PRESS){
+        cameraPos -= cameraFront * cameraSpeed;
     }
-    //G
-    if(key == GLFW_KEY_G && action == GLFW_PRESS){
-        glClearColor(0.0,1.0,0.0,1.0);
+    if(glfwGetKey(window,GLFW_KEY_D) == GLFW_PRESS){
+        cameraPos += glm::normalize(glm::cross(cameraFront,cameraUp)) * cameraSpeed;
+    }
+    if(glfwGetKey(window,GLFW_KEY_A) == GLFW_PRESS){
+        cameraPos -= glm::normalize(glm::cross(cameraFront,cameraUp)) * cameraSpeed;
     }
 }
+
 void framebuffer_size_callback(GLFWwindow* window,int width,int height){
     glViewport(0,0,width,height);
 }
