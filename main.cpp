@@ -13,6 +13,8 @@
 
 
 void framebuffer_size_callback(GLFWwindow* window,int width,int height);
+void mouse_callback(GLFWwindow *window,double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void updateProcesInput(GLFWwindow *window);
 
 //screen settings
@@ -20,9 +22,18 @@ const unsigned int SCR_WIDTH = 1920;
 const unsigned int SCR_HEIGHT = 1080;
 
 //camera
-glm::vec3 cameraPos = glm::vec3(0.0f ,0.0f, 2.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f ,0.0f, 1.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+
+
+//cursor position
+bool firstMouse = true;
+float lastX = SCR_WIDTH / 2.0;
+float lastY = SCR_HEIGHT / 2.0;
+float yaw = -90.f;
+float pitch = 0.0f;
+float fov = 45.0f;
 
 //time
 float delta_time = 0.0f;
@@ -48,7 +59,11 @@ int main() {
     glfwMakeContextCurrent(window);
     //kazemo opengl dimenzije za renderovanje
     glfwSetFramebufferSizeCallback(window,framebuffer_size_callback);
-
+    //registrujemo callback kada pomerimo mis
+    glfwSetCursorPosCallback(window,mouse_callback);
+    glfwSetInputMode(window,GLFW_CURSOR,GLFW_CURSOR_DISABLED    );
+    //registrujemo callback kada pomeramo scrool(zoomi)
+    glfwSetScrollCallback(window,scroll_callback);
 
 
     //sada zovemo glad biblioteku da ucita sve nase opengl funkcije!
@@ -69,7 +84,7 @@ int main() {
     float vertices[] = {
             //prednji pravougaonik
             //first triangle
-            1.0, 0.5, 1.0, 0.0, 1.0, 1.0,   1.0, 0.0,//top right
+            1.0, 0.5, 1.0, 0.0, 1.0, 1.0,   0.0, 0.0,//top right
             -1.0, 0.5 , 1.0, 0.0, 1.0, 1.0,    0.0, 0.0,//top left
             1.0, -0.5, 1.0 ,  0.0, 1.0, 1.0,   0.0, 0.0,// bottom right
             //second triangle
@@ -184,14 +199,6 @@ int main() {
     glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
     //ovde moze i GL_LINE
 
-//aktiviramo shader
-    shader.use();
-
-    //pravimo projekciju
-    glm::mat4 projection = glm::mat4(1.0f);
-    //postavljam perspektivnu projekciju sa 45 stepeni
-    projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-    shader.setMat4("projection", projection);
 
     //RENDER loop
     while(!glfwWindowShouldClose(window))
@@ -209,7 +216,11 @@ int main() {
         glBindTexture(GL_TEXTURE_2D, texture);
 
         shader.use();
-
+        //pravimo projekciju
+        glm::mat4 projection = glm::mat4(1.0f);
+        //postavljam perspektivnu projekciju sa 45 stepeni
+        projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        shader.setMat4("projection", projection);
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraFront + cameraPos, cameraUp);
         shader.setMat4("view", view);
@@ -265,4 +276,52 @@ void updateProcesInput(GLFWwindow* window)
 
 void framebuffer_size_callback(GLFWwindow* window,int width,int height){
     glViewport(0,0,width,height);
+}
+void mouse_callback(GLFWwindow *window,double xpos, double ypos){
+    if(firstMouse){
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    if(pitch > 89.0f){
+        pitch = 89.0f;
+    }
+    if(pitch < -89.0f){
+        pitch = -89.0f;
+    }
+
+    if(yaw < -130.0f)
+        yaw = -130.0f;
+    if(yaw > -50.0f)
+        yaw = -50.0f;
+
+    //racunamo pravac gledanja
+    glm::vec3 direction;
+    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    direction.y =  sin(glm::radians(pitch));
+    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(direction);
+}
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset){
+
+    //kada zumiramo potrebno je da smanjim field of view(45.0f)
+    fov -= float(yoffset);
+    if(fov < 30.0f)
+        fov = 30.0f;
+    if(fov > 45.0f)
+        fov = 45.0f;
+
 }

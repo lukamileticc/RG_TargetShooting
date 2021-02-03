@@ -1,7 +1,3 @@
-//
-// Created by luka on 30.1.21..
-//
-
 #ifndef RG_TARGETSHOOTING_ERROR_HPP
 #define RG_TARGETSHOOTING_ERROR_HPP
 

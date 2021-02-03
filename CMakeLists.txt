@@ -6,7 +6,7 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 add_subdirectory(glad/)
 include_directories(include/)
-add_executable(RG_TargetShooting main.cpp include/Error.hpp include/Shader.hpp include/stb_image.h)
+add_executable(RG_TargetShooting main.cpp include/Error.hpp include/Shader.hpp include/stb_image.h include/Camera.hpp)
 
 target_link_libraries(RG_TargetShooting glad glfw OpenGL::GL
         pthread X11 Xrandr Xi dl)

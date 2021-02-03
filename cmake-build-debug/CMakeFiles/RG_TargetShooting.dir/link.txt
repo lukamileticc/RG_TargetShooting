@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/RG_TargetShooting.dir/main.cpp.o  -o RG_TargetShooting  glad/libglad.a /usr/lib/x86_64-linux-gnu/libglfw.so.3.2 -lpthread -lX11 -lXrandr -lXi -ldl /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so 
